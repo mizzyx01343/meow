@@ -7,7 +7,7 @@ WALLET="87SqinnBgV46pcXAguUumTauSgtTwryQ8Bga1ztFEoRbcWRRwyLsh5MdQRtBc6qHqYhUApRR
 echo "Initiating ultra-stealth setup for wallet: ${WALLET:0:6}...${WALLET: -4}"
 echo "P2Pool mini + 25% throttle = maximum ghost mode."
 
-# System update & dependencies
+# System update & dependencies (added bzip2 for tar.bz2)
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev msr-tools hugepages wget bzip2 screen
 
@@ -15,10 +15,10 @@ sudo apt install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
 sudo sysctl -w vm.nr_hugepages=128
 echo 'vm.nr_hugepages=128' | sudo tee -a /etc/sysctl.conf
 
-# Latest Monerod v0.18.4.4 (pruned – fast sync, low disk)
-wget https://downloads.getmonero.org/cli/linux64 -O monero-linux-x64.tar.bz2
-tar -xjf monero-linux-x64.tar.bz2
-cd monero-x86_64-linux-gnu-* || exit
+# Latest Monerod v0.18.4.4 direct download
+wget https://downloads.getmonero.org/cli/monero-linux-x64-v0.18.4.4.tar.bz2
+tar -xjf monero-linux-x64-v0.18.4.4.tar.bz2
+cd monero-x86_64-linux-gnu-v0.18.4.4 || exit
 nohup ./monerod --prune-blockchain --zmq-pub tcp://127.0.0.1:18083 --detach --non-interactive > monerod.log 2>&1 &
 cd ..
 echo "Monerod v0.18.4.4 syncing pruned in background. Full sync ~20-60 mins."
